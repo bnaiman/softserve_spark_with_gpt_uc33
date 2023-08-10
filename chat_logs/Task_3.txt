@@ -1,0 +1,156 @@
+In the current folder I have csv file named transactions
+Write PySpark code which includes a function that expects a transactions dataset as input
+and returns it with an additional column "level". The value of "level " is calculated based on the "amount" column as:
+
+Top 25% of all transactions get a value "high". 
+
+The next 50% of all transactions get "average". 
+
+The rest gets "low".
+
+ChatGPT
+Certainly! Here's a PySpark code that achieves this. First, we need to load the dataset, then compute the thresholds for the levels based on the distribution of the 'amount' column, and finally create the new 'level' column:
+
+python
+Copy code
+from pyspark.sql import SparkSession
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col, when, percentile_approx
+
+# Initialize Spark Session
+spark = SparkSession.builder \
+    .appName("Transaction Levels") \
+    .getOrCreate()
+
+def assign_transaction_level(transactions):
+    # Calculate the 25th and 75th percentiles of the 'amount' column
+    percentiles = transactions.approxQuantile("amount", [0.25, 0.75], 0.01)
+    low_threshold, high_threshold = percentiles
+
+    # Add the 'level' column based on the 'amount' column
+    transactions_with_level = transactions.withColumn(
+        "level",
+        when(col("amount") >= high_threshold, "high")
+        .when((col("amount") < high_threshold) & (col("amount") >= low_threshold), "average")
+        .otherwise("low")
+    )
+
+    return transactions_with_level
+
+# Load the transactions dataset
+transactions = spark.read.csv("transactions.csv", header=True, inferSchema=True)
+
+# Process the dataset
+result = assign_transaction_level(transactions)
+result.show()
+
+# Optionally, stop the Spark session
+spark.stop()
+This script starts a PySpark session, loads the transactions.csv dataset, applies the assign_transaction_level function, and shows the result. You can further modify it to save the results or perform other operations.
+
+
+
+
+User
+delimiters in csv files are ";" they contain headers
+ChatGPT
+Alright, if your CSV files use ; as a delimiter and contain headers, you just need to adjust the loading process of the dataset.
+
+Here's the updated code:
+
+python
+Copy code
+from pyspark.sql import SparkSession
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col, when, percentile_approx
+
+# Initialize Spark Session
+spark = SparkSession.builder \
+    .appName("Transaction Levels") \
+    .getOrCreate()
+
+def assign_transaction_level(transactions):
+    # Calculate the 25th and 75th percentiles of the 'amount' column
+    percentiles = transactions.approxQuantile("amount", [0.25, 0.75], 0.01)
+    low_threshold, high_threshold = percentiles
+
+    # Add the 'level' column based on the 'amount' column
+    transactions_with_level = transactions.withColumn(
+        "level",
+        when(col("amount") >= high_threshold, "high")
+        .when((col("amount") < high_threshold) & (col("amount") >= low_threshold), "average")
+        .otherwise("low")
+    )
+
+    return transactions_with_level
+
+# Load the transactions dataset with ';' delimiter and header
+transactions = spark.read.csv("transactions.csv", header=True, inferSchema=True, delimiter=';')
+
+# Process the dataset
+result = assign_transaction_level(transactions)
+result.show()
+
+# Optionally, stop the Spark session
+spark.stop()
+This adjustment ensures that the CSV file is loaded correctly using the ; delimiter and that the first row is treated as headers.
+
+
+
+
+User
+when run the code I got the following error TypeError: DataFrameReader.csv() got an unexpected keyword argument 'delimiter'
+ChatGPT
+I apologize for the oversight. You're right; for earlier versions of Spark, the delimiter parameter wasn't available directly in the csv() method. Instead, you should use the option() method.
+
+Here's how to adjust the CSV loading code:
+
+python
+Copy code
+# Load the transactions dataset with ';' delimiter and header
+transactions = spark.read.option("delimiter", ";").csv("transactions.csv", header=True, inferSchema=True)
+Replace the earlier CSV loading line with this, and the rest of the code remains unchanged.
+
+
+
+
+User
+please provide the full code
+ChatGPT
+Certainly! Here's the full code, incorporating the updated CSV loading:
+
+python
+Copy code
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, when, percentile_approx
+
+# Initialize Spark Session
+spark = SparkSession.builder \
+    .appName("Transaction Levels") \
+    .getOrCreate()
+
+def assign_transaction_level(transactions):
+    # Calculate the 25th and 75th percentiles of the 'amount' column
+    percentiles = transactions.approxQuantile("amount", [0.25, 0.75], 0.01)
+    low_threshold, high_threshold = percentiles
+
+    # Add the 'level' column based on the 'amount' column
+    transactions_with_level = transactions.withColumn(
+        "level",
+        when(col("amount") >= high_threshold, "high")
+        .when((col("amount") < high_threshold) & (col("amount") >= low_threshold), "average")
+        .otherwise("low")
+    )
+
+    return transactions_with_level
+
+# Load the transactions dataset with ';' delimiter and header
+transactions = spark.read.option("delimiter", ";").csv("transactions.csv", header=True, inferSchema=True)
+
+# Process the dataset
+result = assign_transaction_level(transactions)
+result.show()
+
+# Optionally, stop the Spark session
+spark.stop()
+This version of the code uses the option() method for setting the delimiter, making it compatible with earlier versions of Spark.
