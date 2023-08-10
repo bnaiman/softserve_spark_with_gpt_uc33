@@ -1,0 +1,40 @@
+How to install docker on Mac
+ChatGPT
+To install Docker on a Mac, you'll typically use Docker Desktop, which is a native application that provides a Docker CLI, Docker Compose, and other Docker tooling. Here's how to install Docker Desktop on macOS:
+
+Prerequisites:
+
+Mac hardware must be a 2010 or newer model.
+macOS must be version 10.14 or newer.
+VirtualBox prior version 4.3.30 must NOT be installed.
+Download Docker Desktop for Mac:
+
+Go to the Docker Desktop for Mac download page.
+Click "Download for Mac (Stable)".
+Install Docker Desktop:
+
+Open the downloaded .dmg file.
+Drag and drop the Docker application to the Applications folder.
+Start Docker Desktop:
+
+Navigate to your Applications folder and click on Docker to start it. The first time you open Docker, you might be prompted to open the application you downloaded from the internet. Click "Open".
+You'll see a whale icon 🐳 in the top status bar indicating that Docker is running.
+Check Docker Installation:
+
+Open Terminal.
+Run docker --version to see the installed version.
+Test a Docker run by using: docker run hello-world. This will download and run the hello-world Docker image, ensuring that your Docker installation is functioning properly.
+Docker Preferences:
+
+Click on the Docker whale icon 🐳 in the top status bar.
+Choose "Preferences" to adjust settings like auto-starting Docker on system start-up, resource allocation (CPU, Memory) to the Docker VM, and more.
+Uninstalling Docker Desktop (if needed):
+
+From the whale 🐳 menu in the status bar, choose "Troubleshoot" and then "Uninstall".
+Click "Uninstall" or "Remove" to confirm.
+This will remove Docker and all its related components.
+Once Docker Desktop is installed and running, you'll have access to the Docker CLI, Docker Compose, and the ability to run containers natively on your Mac.
+
+
+
+
